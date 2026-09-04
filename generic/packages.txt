@@ -1,0 +1,36 @@
+# Portable Hyprland keybind dependencies
+# These names are examples, not all are required on every machine.
+# Install the tools you want from your distribution's repositories.
+
+hyprlock
+playerctl
+brightnessctl
+hyprpicker
+wl-clipboard
+cliphist
+
+# Choose at least one terminal:
+kitty
+foot
+alacritty
+wezterm
+
+# Choose at least one launcher:
+rofi-wayland
+wofi
+fuzzel
+
+# Screenshot option 1:
+hyprshot
+
+# Screenshot option 2:
+grim
+slurp
+wl-clipboard
+
+# File managers are auto-detected:
+dolphin
+thunar
+nautilus
+
+# Generic mode also uses xdg-open / xdg-utils.

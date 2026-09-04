@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+pick() {
+    for cmd in "$@"; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            printf '%s\n' "$cmd"
+            return 0
+        fi
+    done
+    return 1
+}
+
+case "${1:-}" in
+    terminal)
+        term="${TERMINAL:-}"
+        if [[ -n "$term" ]] && command -v "$term" >/dev/null 2>&1; then
+            exec "$term"
+        fi
+        term=$(pick kitty foot alacritty wezterm xterm) || { echo "No terminal emulator found." >&2; exit 1; }
+        exec "$term"
+        ;;
+    files)
+        if command -v dolphin >/dev/null 2>&1; then exec dolphin "$HOME"; fi
+        if command -v thunar >/dev/null 2>&1; then exec thunar "$HOME"; fi
+        if command -v nautilus >/dev/null 2>&1; then exec nautilus "$HOME"; fi
+        exec xdg-open "$HOME"
+        ;;
+    browser)
+        exec xdg-open 'about:blank'
+        ;;
+    editor)
+        editor=$(pick kate gnome-text-editor gedit mousepad code) || exec xdg-open "$HOME"
+        exec "$editor"
+        ;;
+    notes)
+        if command -v obsidian >/dev/null 2>&1; then exec obsidian; fi
+        editor=$(pick kate gnome-text-editor gedit mousepad) || exec xdg-open "$HOME"
+        exec "$editor"
+        ;;
+    yazi)
+        term=$(pick kitty foot alacritty wezterm xterm) || { echo "No terminal emulator found for yazi." >&2; exit 1; }
+        command -v yazi >/dev/null 2>&1 || { echo "yazi is not installed." >&2; exit 1; }
+        exec "$term" -e yazi
+        ;;
+    launcher)
+        if command -v rofi >/dev/null 2>&1; then exec rofi -show drun; fi
+        if command -v wofi >/dev/null 2>&1; then exec wofi --show drun; fi
+        if command -v fuzzel >/dev/null 2>&1; then exec fuzzel; fi
+        if command -v tofi-drun >/dev/null 2>&1; then exec tofi-drun; fi
+        echo "No Wayland launcher found (rofi-wayland, wofi, fuzzel, or tofi)." >&2
+        exit 1
+        ;;
+    lock)
+        if command -v hyprlock >/dev/null 2>&1; then exec hyprlock; fi
+        exec loginctl lock-session
+        ;;
+    switcher)
+        if command -v rofi >/dev/null 2>&1; then exec rofi -show window; fi
+        if command -v wofi >/dev/null 2>&1; then exec wofi --show drun; fi
+        if command -v fuzzel >/dev/null 2>&1; then exec fuzzel; fi
+        echo "No window switcher/launcher found." >&2
+        exit 1
+        ;;
+    picker)
+        command -v hyprpicker >/dev/null 2>&1 || { echo "hyprpicker is not installed." >&2; exit 1; }
+        exec hyprpicker -a
+        ;;
+    screenshot)
+        if command -v hyprshot >/dev/null 2>&1; then exec hyprshot -m region; fi
+        if command -v grimblast >/dev/null 2>&1; then exec grimblast copy area; fi
+        if command -v grim >/dev/null 2>&1 && command -v slurp >/dev/null 2>&1; then exec sh -c 'grim -g "$(slurp)" - | wl-copy'; fi
+        echo "Install hyprshot, grimblast, or grim + slurp + wl-clipboard for screenshots." >&2
+        exit 1
+        ;;
+    screenshot-monitor)
+        if command -v hyprshot >/dev/null 2>&1; then exec hyprshot -m output; fi
+        if command -v grimblast >/dev/null 2>&1; then exec grimblast copy output; fi
+        if command -v grim >/dev/null 2>&1; then exec grim - | wl-copy; fi
+        echo "Install hyprshot, grimblast, or grim + wl-clipboard for screenshots." >&2
+        exit 1
+        ;;
+    clipboard)
+        if command -v cliphist >/dev/null 2>&1 && command -v wofi >/dev/null 2>&1; then
+            cliphist list | wofi --dmenu | cliphist decode | wl-copy
+            exit $status
+        fi
+        if command -v cliphist >/dev/null 2>&1 && command -v rofi >/dev/null 2>&1; then
+            cliphist list | rofi -dmenu | cliphist decode | wl-copy
+            exit $status
+        fi
+        echo "Install cliphist + wl-clipboard + a dmenu launcher for clipboard history." >&2
+        exit 1
+        ;;
+    brightness-up)
+        command -v brightnessctl >/dev/null 2>&1 || { echo "brightnessctl is not installed." >&2; exit 1; }
+        exec brightnessctl set 5%+
+        ;;
+    brightness-down)
+        command -v brightnessctl >/dev/null 2>&1 || { echo "brightnessctl is not installed." >&2; exit 1; }
+        exec brightnessctl set 5%-
+        ;;
+    *)
+        echo "Usage: $0 {terminal|files|browser|editor|notes|yazi|launcher|lock|switcher|picker|screenshot|screenshot-monitor|clipboard|brightness-up|brightness-down}" >&2
+        exit 2
+        ;;
+esac

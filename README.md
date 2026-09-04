@@ -85,7 +85,7 @@ At minimum, the generic keybind file can work with a terminal, a launcher, a fil
 generic/
 ├── keybinds-ilham.conf
 ├── ilham-hypr-app
-a└── packages.txt
+└── packages.txt
 
 hypr/
 ├── hyprland.lua

@@ -1,0 +1,16 @@
+# CachyOS / Arch Linux packages used by these keybinds
+# Core commands invoked directly by the keybind files:
+ryoku
+kitty
+yazi
+playerctl
+libnotify
+hyprpicker
+
+# Also required by parts of the setup but normally supplied by the desktop/shell:
+# quickshell / qs      -> Brain Shell keybinds
+# ryoku-clamshell      -> laptop lid handling
+# ryoku-monitor        -> monitor toggle
+# ryoku-shell          -> lock/voice/hub commands
+# ryogami              -> wallpaper commands
+# Brain Desktop        -> qs ipc calls in Brain_Shell/Brain_ShellKeybinds.lua

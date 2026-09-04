@@ -1,38 +1,92 @@
 # Hyprland Keybinds — Ilham
 
-Personal backup of the working `ilham` Hyprland keybind setup on CachyOS + Ryoku + Brain Shell.
+A reusable backup of Ilham's Hyprland keyboard shortcuts, with two installation modes:
 
-This repository is intended to make a fresh OS installation easier: restore the keybind files once and keep your familiar shortcuts.
+- **Ilham / Ryoku mode** — restores the original CachyOS + Ryoku + Brain Shell setup.
+- **Generic Hyprland mode** — keeps the Windows-style/core shortcuts while removing the dependency on Ryoku and Brain Shell. It is intended for moving between Arch, CachyOS, Fedora, and other distributions that run a normal Hyprland configuration.
 
-## Quick install
+## Quick install — Ilham / Ryoku
 
-Designed for Arch Linux / CachyOS.
+For the original setup:
 
 ```bash
 git clone https://github.com/ilhamfirmansyahhub/keybinds-ilham.git
 cd keybinds-ilham
 chmod +x install.sh
 ./install.sh
+hyprctl reload
 ```
 
-The installer:
+This mode restores the original Lua keybind modules, Ryoku key remap, and Brain Shell bindings. It expects a working Ryoku/Brain Shell environment.
 
-- installs the common command-line dependencies with `pacman`;
-- creates the required configuration directories;
-- backs up existing keybind files with a timestamp;
-- restores the Hyprland keybind modules;
-- restores the Ryoku keybind remap (`SUPER + Space` → `SUPER + X`);
-- restores Brain Shell keybinds and automatically adapts the Brain Shell path to the current `$HOME`.
+## Quick install — Generic Hyprland
 
-Reload Hyprland after installation:
+For another distro or a Hyprland setup without Ryoku:
+
+```bash
+git clone https://github.com/ilhamfirmansyahhub/keybinds-ilham.git
+cd keybinds-ilham
+chmod +x install.sh
+./install.sh --generic
+```
+
+The generic installer:
+
+1. Installs a portable keybind file at `~/.config/hypr/keybinds-ilham-generic.conf`.
+2. Installs `~/.local/bin/ilham-hypr-app`, which automatically detects commonly available terminals, launchers, file managers, browsers and desktop tools.
+3. Backs up files before replacing them.
+4. Automatically adds the generic `source = ...` line when a standard `~/.config/hypr/hyprland.conf` exists.
+5. Does **not** require Ryoku or Brain Shell.
+
+If your Hyprland setup does not use `hyprland.conf` (for example, a custom Lua/config loader), add this line through the loader used by your setup:
+
+```text
+source = ~/.config/hypr/keybinds-ilham-generic.conf
+```
+
+Then run:
 
 ```bash
 hyprctl reload
 ```
 
+## What generic mode preserves
+
+Generic mode keeps the portable/core parts of the Ilham layout: Windows-style window controls, fullscreen/floating, focus and window movement, resize mode with arrows/hjkl, application shortcuts, launcher, lock, clipboard, window switching, workspace shortcuts, mouse move/resize, media keys, volume, brightness, color picker, and screenshots.
+
+Functions that depended directly on Ryoku or Brain Shell are intentionally replaced with portable equivalents or omitted when there is no reliable cross-desktop equivalent.
+
+## Dependencies
+
+### Original mode
+
+The original backup uses commands such as:
+
+- `ryoku`
+- `kitty`
+- `yazi`
+- `playerctl`
+- `libnotify`
+- `hyprpicker`
+- Ryoku components such as `ryoku-shell`, `ryoku-monitor`, `ryogami`, `ryoku-workspace`, and `qs`
+- Brain Desktop for the Brain Shell IPC bindings
+
+See `packages.txt` for the Arch/CachyOS dependency notes.
+
+### Generic mode
+
+The generic installer does not assume one package manager. Install the tools you want from your distribution. The reference list is in `generic/packages.txt`.
+
+At minimum, the generic keybind file can work with a terminal, a launcher, a file manager/browser, and Hyprland itself. Optional features use tools such as `playerctl`, `brightnessctl`, `hyprlock`, `hyprpicker`, `wl-clipboard`, `cliphist`, and a screenshot utility.
+
 ## Included files
 
 ```text
+generic/
+├── keybinds-ilham.conf
+├── ilham-hypr-app
+a└── packages.txt
+
 hypr/
 ├── hyprland.lua
 ├── user.lua
@@ -49,50 +103,20 @@ Brain_Shell/
 
 packages.txt
 install.sh
+README.md
 ```
 
-## Main shortcuts preserved
+`hyprland.lua` is retained as a reference backup of the original Ryoku loader. The original installer does not overwrite a fresh Ryoku-generated loader.
 
-The backup includes the existing Windows-style window controls, window focus/move/resize shortcuts, app launch shortcuts, Ryoku launcher/tools, workspaces, scratchpads, media keys, brightness controls, touchpad controls, screenshot shortcuts, lid-switch handling, the resize submap, and Brain Shell bindings.
+## Portability notes
 
-The exact shortcuts are kept in the Lua files rather than duplicated in this README, so the files remain the source of truth.
+The repository stores configuration, not a complete desktop environment. Generic mode is the portable choice when you move to another distribution or another Hyprland setup. Application commands are selected at runtime so the same shortcuts can survive different application choices.
 
-## Dependencies
-
-Common packages used directly by the keybind commands:
-
-- `ryoku`
-- `kitty`
-- `yazi`
-- `playerctl`
-- `libnotify`
-- `hyprpicker`
-
-The full desktop behavior also relies on the existing Ryoku/Brain Shell environment, including commands such as `ryoku-shell`, `ryoku-monitor`, `ryogami`, `qs`, `ryoku-workspace`, and the Brain Desktop configuration.
-
-`packages.txt` contains the dependency notes.
-
-## Important: Ryoku-generated files
-
-`hyprland.lua` is included in the repository as a reference backup of the working setup. The installer intentionally does **not** overwrite a fresh Ryoku-generated `hyprland.lua`, because Ryoku may generate/update that loader for the installed version.
-
-The keybind modules that are user-specific are restored directly, while the fresh Ryoku loader remains in control of the overall configuration.
-
-## Brain Shell
-
-The included Brain Shell keybind file was captured from the working setup. It references the Brain Desktop configuration under:
-
-```text
-~/.config/quickshell/brain-desktop
-```
-
-The installer rewrites the embedded path to the current user's `$HOME`, so it is not permanently tied to `/home/ilham`.
-
-The Brain Desktop itself is **not** included in this repository and must be restored separately.
+The generic mode assumes a conventional Hyprland `hyprland.conf` when automatic sourcing is possible. Custom loaders may require one manual `source = ...` integration step.
 
 ## Safety
 
-The installer runs as a normal user and only uses `sudo` for installing packages. Existing configuration files are backed up before replacement. No passwords, tokens, or secrets should be stored in this repository.
+Both modes back up existing files before replacement. The repository should contain configuration only; do not add passwords, tokens, private keys, or other secrets.
 
 ## Author
 
